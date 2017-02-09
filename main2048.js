@@ -5,10 +5,33 @@ var board = new Array();
 var score = 0;
 var hasConflicted=new Array();
 
+var startx=0;
+var starty=0;
+var endx=0;
+var endy=0;
+
 $(document).ready(function () {
+    prepareForMobile();
     newgame();
 
 });
+
+function prepareForMobile() {
+    if (documentWidth>500){
+        gridContainerWidth=500;
+        cellSpace=20;
+        cellSideLength=100;
+    }
+    $('#grid-container').css('width',gridContainerWidth-2*cellSpace);
+    $('#grid-container').css('height',gridContainerWidth-2*cellSpace);
+    $('#grid-container').css('padding',cellSpace);
+    $('#grid-container').css('border-radius',0.02*gridContainerWidth);
+
+    $('.grid-cell').css('width',cellSideLength);
+    $('.grid-cell').css('height',cellSideLength);
+    $('.grid-cell').css('border-radius',0.02*cellSideLength);
+}
+
 function newgame() {
     //初始化棋盘格
     //随机在两个格子生产数字
@@ -46,12 +69,12 @@ function updateBoardView() {
             if (board[i][j] == 0) {
                 theNumberCell.css('width', '0px');
                 theNumberCell.css('height', '0px');
-                theNumberCell.css('top', getPosTop(i, j) + 50);
-                theNumberCell.css('left', getPosLeft(i, j) + 50);
+                theNumberCell.css('top', getPosTop(i, j) + cellSideLength/2);
+                theNumberCell.css('left', getPosLeft(i, j) + cellSideLength/2);
             }
             else {
-                theNumberCell.css('width', '100px');
-                theNumberCell.css('height', '100px');
+                theNumberCell.css('width', cellSideLength);
+                theNumberCell.css('height', cellSideLength);
                 theNumberCell.css('top', getPosTop(i, j));
                 theNumberCell.css('left', getPosLeft(i, j));
                 theNumberCell.css('background-color', getColor(board[i][j]));
@@ -75,6 +98,10 @@ function updateBoardView() {
             }
             hasConflicted[i][j]=false;
         }
+
+    $('.number-cell').css('line-height',cellSideLength+'px');
+    $('.number-cell').css('font-size',0.22*cellSideLength+'px');
+
 }
 function newOneNum() {
     if (nospace(board))return false;
@@ -111,6 +138,7 @@ function newOneNum() {
 }
 
 $(document).keydown(function (event) {
+   // event.preventDefault();
     switch( event.keyCode ){
         case 37: //left
             if( moveLeft() ){
@@ -140,6 +168,57 @@ $(document).keydown(function (event) {
             break;
     }
 });
+
+document.addEventListener('touchstart',function (event) {
+    startx=event.touches[0].pageX;
+    starty=event.touches[0].pageY;
+});
+document.addEventListener('touchend',function (event) {
+    endx=event.changedTouches[0].pageX;
+    endy=event.changedTouches[0].pageY;
+
+    var deltax=endx-startx;
+    var deltay=endy-starty;
+    if (Math.abs(deltax)<0.3*documentWidth&&Math.abs(deltay)<0.3*documentWidth){
+        return;
+    }
+
+    if (Math.abs(deltax)>=Math.abs(deltay)){
+        //x方向
+        if (deltax>0){
+            //move right
+            if( moveRight() ){
+                setTimeout("newOneNum()",210);
+                setTimeout("isGameOver()",300);
+            }
+        }
+        else {
+            //move left
+            if( moveLeft() ){
+                setTimeout("newOneNum()",210);
+                setTimeout("isGameOver()",300);
+            }
+        }
+    }
+    else {
+        //y方向
+        if (deltay>0){
+            //move down
+            if( moveDown() ){
+                setTimeout("newOneNum()",210);
+                setTimeout("isGameOver()",300);
+            }
+        }else {
+            //move up
+            if( moveUp() ){
+                setTimeout("newOneNum()",210);
+                setTimeout("isGameOver()",300);
+            }
+        }
+    }
+});
+
+
 function isGameOver(){
     if( nospace( board ) && nomove( board ) ){
         gameover();

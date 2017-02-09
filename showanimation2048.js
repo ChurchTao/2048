@@ -11,8 +11,8 @@ function showNumWithAnimation(i,j,num) {
         case 4:numberCell.text("实习生");break;
     }
     numberCell.animate({
-        width:"100px",
-        height:"100px",
+        width:cellSideLength,
+        height:cellSideLength,
         top:getPosTop(i,j),
         left:getPosLeft(i,j)
     },200)
